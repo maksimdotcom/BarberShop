@@ -4,18 +4,25 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sqlite3'
 
+def get_db
+	db = SQLite3::Database.new 'barbershop.db'
+	db.results_as_hash = true
+	return db
+end
+
 configure do 
-	@db = SQLite3::Database.new 'barbershop.db'
-	@db.execute 'CREATE TABLE IF NOT EXISTS
+	db = get_db
+	db.execute 'CREATE TABLE IF NOT EXISTS
 		"Users"
 		(
 			"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 			"username" TEXT,
+			"phone" TEXT,
 			"datestamp" TEXT,
 			"barber" TEXT,
 			"color" TEXT
 		)'
-end
+ end
 
 get '/' do
 	erb "Hello! <a href=\"https://github.com/bootstrap-ruby/sinatra-bootstrap\">Original</a> pattern has been modified for <a href=\"http://rubyschool.us/\">Ruby School</a>"			
@@ -52,9 +59,18 @@ post '/visit' do
 	@title = 'Thank you!'
 	@message = "Уважаемый #{@user_name}, мы ждём вас #{@date_time}"
 
-	f = File.open './public/users.txt', 'a'
-	f.write "User: #{@user_name}, Phone: #{@phone}, Dte and time: #{@date_time}, Baber: #{@barber}, Color: #{@color}.\n"
-	f.close
+	db = get_db
+	db.execute 'insert into
+		Users
+		(
+			username,
+			phone,
+			datestamp,
+			barber,
+			color
+		)
+		values (?, ?, ?, ?, ?)', [@user_name, @phone, @date_time, @barber, @color]
+	
 
 	erb :welcome
 end
@@ -75,3 +91,4 @@ post '/contacts' do
 	@message = 'уауа'
 		erb :welcome
 end
+
