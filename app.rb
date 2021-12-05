@@ -24,6 +24,11 @@ def get_db
 	return db
 end
 
+before do
+	db = get_db
+	@barbers = db.execute 'select * from Barbers'
+end
+
 configure do 
 	db = get_db
 	db.execute 'CREATE TABLE IF NOT EXISTS
@@ -56,6 +61,7 @@ get '/about' do
 end
 
 get '/visit' do
+
 	erb :visit
 end
  
